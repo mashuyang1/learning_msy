@@ -1,0 +1,6 @@
+import urllib.request
+response = urllib.request.urlopen('https://www.python.org',timeout=1)
+# print(response.readinto())
+print(type(response))
+print(response.getheaders())
+print(response.getheader('server'))
