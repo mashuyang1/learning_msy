@@ -1,6 +1,7 @@
 import re
-import time
-
+import xlwt
+import xlrd
+from xlutils import copy
 import bs4
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -20,7 +21,7 @@ def get_index_page():
     # print(type(input_first))
     input_first.send_keys("2020-01-01")
     input_second = browser.find_element(By.CSS_SELECTOR, 'input.search_ipt[name="nothing"]')
-    input_second.send_keys('2021-04-02')
+    input_second.send_keys('2021-05-10')
     select = browser.find_element_by_tag_name('select')
     select.send_keys('美元')
     submit = browser.find_element(By.CSS_SELECTOR, 'form#historysearchform input.search_btn')
@@ -41,10 +42,46 @@ def parse_page_source():
     html = browser.page_source
     soup = bs4.BeautifulSoup(html, 'lxml')
     a = soup.select('div.BOC_main.publish table tbody tr')
+
+    lis = []
     for table in a:
-        print()
+        # print()
+
         for cum in table:
-            print(cum.string.replace('\n', ''), end='\t')
+            # print(cum.string.replace('\n', ''), end='\t')
+            s = cum.string.replace('\n', '')
+            if s != '':
+                lis.append(s)
+    return lis
+
+
+def write_excel(data):
+    # print(data[0])
+    wb = xlrd.open_workbook('汇率.xls')
+    ws = wb.sheet_by_name('汇率')
+    rows = ws.nrows
+    col = 0
+    new_wb = copy.copy(wb)
+    new_ws = new_wb.get_sheet(0)
+    for row_data in data:
+
+        # print('~~~~~~~~~~')
+        # print(row_data)
+        # if rows == 0:
+
+        # print(col)
+        if col != 7:
+            new_ws.write(rows, col, row_data)
+            new_wb.save('汇率.xls')
+            col += 1
+        else:
+            col = 0
+            rows += 1
+            new_ws.write(rows, col, row_data)
+            new_wb.save('汇率.xls')
+            col += 1
+        # if rows != 0:
+        #     print(col)
 
 
 if __name__ == '__main__':
@@ -52,7 +89,9 @@ if __name__ == '__main__':
     # print(type(int(page_number)))
     for i in range(0, int(page_number)):
         # print("正在打印第\\s页" % i)
-        parse_page_source()
+        list_data = parse_page_source()
+        write_excel(list_data)
         page_turning()
     # page_turning()
+    print('保存完毕！！！')
     browser.close()
