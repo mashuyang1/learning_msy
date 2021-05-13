@@ -1,5 +1,4 @@
 import re
-import xlwt
 import xlrd
 from xlutils import copy
 import bs4
